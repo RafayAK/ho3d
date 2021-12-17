@@ -1,5 +1,7 @@
 """
 Visualize the projections in published HO-3D dataset
+
+python vis_HO3D.py /home/rafay_veeve/Desktop/Veeve/galactus/HO3D_v3 /home/rafay_veeve/Desktop/Veeve/galactus/YCB_Video_Models -split train -seq MC1 -id 0051 -visType open3d
 """
 from os.path import join
 import pip
@@ -174,7 +176,8 @@ if __name__ == '__main__':
 
             # show
             if split == 'train':
-                open3dVisualize([handMesh, objMesh], ['r', 'g'])
+                # open3dVisualize([handMesh, objMesh], ['r', 'g'])
+                open3dVisualize2([handMesh, objMesh], ['r', 'g'], anno["camMat"])
             else:
                 open3dVisualize([objMesh], ['r', 'g'])
 
