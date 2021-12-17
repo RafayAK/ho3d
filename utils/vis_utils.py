@@ -9,6 +9,7 @@ import math
 import sys
 import matplotlib.pyplot as plt
 import cv2
+from PIL import Image
 
 """ General util functions. """
 def _assert_exist(p):
@@ -329,6 +330,192 @@ def open3dVisualize(mList, colorList):
 
         o3dMeshList.append(mesh)
     open3d.visualization.draw_geometries(o3dMeshList)
+
+
+def open3dVisualize2(mList, colorList, camMat):
+    import open3d
+    import open3d.visualization.rendering as rendering
+
+    render = rendering.OffscreenRenderer(640, 480)
+    pinhole = open3d.camera.PinholeCameraIntrinsic(640, 480, camMat[0][0], camMat[1][1], camMat[0][2], camMat[1][2])
+    # Pick a background colour (default is light gray)
+    render.scene.set_background([0.0, 0.0, 0.0, 1.0])  # RGBA
+
+
+
+    o3dMeshList = []
+
+
+    for i, m in enumerate(mList):
+        mesh = open3d.geometry.TriangleMesh()
+        mtl = open3d.visualization.rendering.MaterialRecord()
+        numVert = 0
+        if hasattr(m, 'r'):
+            mesh.vertices = open3d.utility.Vector3dVector(np.copy(m.r))
+            numVert = m.r.shape[0]
+        elif hasattr(m, 'v'):
+            mesh.vertices = open3d.utility.Vector3dVector(np.copy(m.v))
+            numVert = m.v.shape[0]
+        else:
+            raise Exception('Unknown Mesh format')
+        mesh.triangles = open3d.utility.Vector3iVector(np.copy(m.f))
+        if colorList[i] == 'r':
+            # mesh.vertex_colors = open3d.utility.Vector3dVector(np.tile(np.array([[0.0, 1.0, 0.0]]), [numVert, 1]))
+            mesh.paint_uniform_color([0, 0, 1])
+            # Define a simple unlit Material.
+            # (The base color does not replace the arrows' own colors.)
+
+            mtl.base_color = [1.0, 1.0, 1.0, 1.0]  # RGBA
+            mtl.shader = "defaultUnlit"
+            # mtl.base_reflectance = 0.0
+            # mtl.base_roughness = 0.0
+        elif colorList[i] == 'g':
+            # mesh.vertex_colors = open3d.utility.Vector3dVector(np.tile(np.array([[1.0, 0.0, 0.0]]), [numVert, 1]))
+            mesh.paint_uniform_color([1, 0, 0])
+            mtl.base_color = [1.0, 1.0, 1.0, 1.0]  # RGBA
+            mtl.shader = "defaultUnlit"
+            # mtl.base_reflectance = 0.0
+            # mtl.base_roughness = 0.0
+        elif isinstance(colorList[i],np.ndarray):
+            assert colorList[i].shape == np.array(mesh.vertices).shape
+            # mesh.vertex_colors = open3d.utility.Vector3dVector(colorList[i])
+        else:
+            raise Exception('Unknown mesh color')
+
+        mesh.filter_sharpen(2, 10, open3d.geometry.FilterScope.Color)
+        o3dMeshList.append(mesh)
+        render.scene.add_geometry("model"+str(i), mesh, mtl)
+
+
+    render.scene.camera.set_projection(camMat, 0.1, 1.0, 640, 480)
+
+    # Read the image into a variable
+    img_o3d = render.render_to_image()
+
+    # Display the image in a separate window
+    # (Note: OpenCV expects the color in BGR format, so swap red and blue.)
+    # img_cv2 = cv2.cvtColor(np.array(img_o3d), cv2.COLOR_RGBA2BGRA)
+    img_cv2 = cv2.cvtColor(np.array(img_o3d), cv2.COLOR_RGBA2BGR)
+    cv2.imshow("Preview window", img_cv2)
+    cv2.waitKey()
+
+    plt.imshow(img_cv2[:, :, [2, 1, 0]])
+    # img = np.array(img_o3d)
+    # # img[np.where(np.argmax(img)==0)] = (255, 0, 0)
+    # plt.imshow(img_o3d)
+    plt.show()
+    cv2.waitKey()
+
+
+    b, g, r= img_cv2[:,:, 0], img_cv2[:,:, 1], img_cv2[:,:, 2]
+
+    r[r >= 189] = 255
+    g[g >= 189] = 255
+    b[b >= 189] = 255
+    r[r < 189] = 0
+    g[g < 189] = 0
+    b[b < 189] = 0
+
+    img_cv2[:,:,0] , img_cv2[:,:,1], img_cv2[:,:,2] = b, g, r
+
+    plt.imshow(img_cv2)
+    plt.show()
+    cv2.waitKey()
+
+    # Optionally write it to a PNG file
+    # open3d.io.write_image("output.png", img_o3d, 9)
+    cv2.imwrite("output.png", img_cv2)
+
+def saveOpen3dVisualization(mList, colorList, camMat, palette,save_loaction):
+    import open3d
+    import open3d.visualization.rendering as rendering
+
+    render = rendering.OffscreenRenderer(640, 480)
+    pinhole = open3d.camera.PinholeCameraIntrinsic(640, 480, camMat[0][0], camMat[1][1], camMat[0][2], camMat[1][2])
+    # Pick a background colour (default is light gray)
+    render.scene.set_background([0.0, 0.0, 0.0, 1.0])  # RGBA
+
+    o3dMeshList = []
+    for i, m in enumerate(mList):
+        mesh = open3d.geometry.TriangleMesh()
+        mtl = open3d.visualization.rendering.MaterialRecord()
+        numVert = 0
+        if hasattr(m, 'r'):
+            mesh.vertices = open3d.utility.Vector3dVector(np.copy(m.r))
+            numVert = m.r.shape[0]
+        elif hasattr(m, 'v'):
+            mesh.vertices = open3d.utility.Vector3dVector(np.copy(m.v))
+            numVert = m.v.shape[0]
+        else:
+            raise Exception('Unknown Mesh format')
+        mesh.triangles = open3d.utility.Vector3iVector(np.copy(m.f))
+        if colorList[i] == 'r':
+            mesh.paint_uniform_color([1, 0, 0])
+            # Define a simple unlit Material.
+            # (The base color does not replace the arrows' own colors.)
+
+            mtl.base_color = [1.0, 1.0, 1.0, 1.0]  # RGBA
+            mtl.shader = "defaultUnlit"
+        elif colorList[i] == 'g':
+            # mesh.vertex_colors = open3d.utility.Vector3dVector(np.tile(np.array([[0.5, 0.5, 0.5]]), [numVert, 1]))
+            mesh.paint_uniform_color([0, 0, 1])
+            mtl.base_color = [1.0, 1.0, 1.0, 1.0]  # RGBA
+            mtl.shader = "defaultUnlit"
+        elif isinstance(colorList[i],np.ndarray):
+            assert colorList[i].shape == np.array(mesh.vertices).shape
+            mesh.vertex_colors = open3d.utility.Vector3dVector(colorList[i])
+        else:
+            raise Exception('Unknown mesh color')
+
+        # improve edges
+        # mesh.filter_sharpen(2, 10, open3d.geometry.FilterScope.Color)
+        o3dMeshList.append(mesh)
+        render.scene.add_geometry("model"+str(i), mesh, mtl)
+
+    render.scene.camera.set_projection(camMat, 0.1, 1.0, 640, 480)
+    img_o3d = render.render_to_image()
+
+    img = np.array(img_o3d)
+    r, g, b= img[:, :, 0], img[:, :, 1], img[:, :, 2]
+
+
+
+    # img_cv2 = cv2.cvtColor(np.array(img_o3d), cv2.COLOR_RGBA2BGR)
+
+
+    # cv2.imshow("img_cv2", img_cv2)
+    # cv2.waitKey()
+
+    # quirk make solid colors, open3d uses opengl and that applies shader effects
+    # b, g, r = img_cv2[:, :, 0], img_cv2[:, :, 1], img_cv2[:, :, 2]
+
+    thresh = 255
+    g = np.zeros_like(g)  # set green channnel to zeros as not using it for annotation
+    r[r > b] = 255
+    # g[g >= thresh] = 255
+    b[b > r] = 255
+    r[r < thresh] = 0
+    # g[g < thresh] = 0
+    b[b < thresh] = 0
+
+    # img_cv2[:, :, 0], img_cv2[:, :, 1], img_cv2[:, :, 2] = b, g, r
+
+
+    # cv2.imshow("final", img_cv2)
+    # cv2.waitKey()
+
+    # cv2.imwrite(str(save_loaction)+".png", img_cv2)
+
+    img[:, :, 0], img[:, :, 1], img[:, :, 2] = r, g, b
+
+    palletized_image = np.zeros((img.shape[0], img.shape[1]), dtype=np.uint8)
+    palletized_image[np.all(img == [255, 0, 0], axis=-1)] = 1
+    palletized_image[np.all(img == (0, 0, 255), axis=-1)] = 2
+
+    palletized_image = Image.fromarray(palletized_image, mode='P')
+    palletized_image.putpalette(palette)
+    palletized_image.save(str(save_loaction)+".png")
+
 
 def read_obj(filename):
     """ Reads the Obj file. Function reused from Matthew Loper's OpenDR package"""
