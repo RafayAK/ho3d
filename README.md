@@ -8,11 +8,11 @@ We have now released **version 3** of the HO-3D dataset (HO-3D_v3) with **more a
  [website](https://www.tugraz.at/institute/icg/research/team-lepetit/research-projects/hand-object-3d-pose-annotation/) for details and links.
  The annotation format and folder structure follows almost the same format as the previous version (HO-3D_v2) and hence replacing the old dataset with
  the new one should work just fine. The only change being all the rgb images are now in 'jpg' format instead of 'png' format due to storage constraints.
- 
+
  A new codalab challenge for **version 3** has been created [here](https://competitions.codalab.org/competitions/33267). Submission to this new challenge follows the exact same format as for
   [version 2](https://competitions.codalab.org/competitions/22485). The codalab challenge for [HO-3D_v2](https://competitions.codalab.org/competitions/22485) will **close** on Dec. 1, 2021
  <hr />
- 
+
 
 
 HO-3D is a dataset with 3D pose annotations for hand and object under severe occlusions from each other. The sequences in the dataset contain different
@@ -34,8 +34,8 @@ This repository contains a collection of scripts for:
 
 1. Install basic requirements:
     ```
-    conda create -n python2.7 python=2.7
-    source activate python2.7
+    conda create -n ho3d_3.6 python=3.6
+    source activate ho3d_3.6
     pip install numpy matplotlib scikit-image transforms3d tqdm opencv-python cython open3d
     ```
 2. Download Models&code from the MANO website
@@ -51,15 +51,16 @@ This repository contains a collection of scripts for:
 is the path where you unpacked the object models into (path to where _models_ folder branches off)
 
 5. Download the HO-3D dataset. See project page for instructions. 
-    
+   
 6. Assuming ${DB_PATH} is the path to where you unpacked the dataset (path to where _./train/_ and _./evaluation/_ folder branch off), 
-This should enable you to run the following to show some dataset samples.
+   This should enable you to run the following to show some dataset samples.
     ```
     python vis_HO3D.py ${DB_PATH} ${YCB_PATH}
     python vis_HO3D.py ${DB_PATH} ${YCB_PATH} -split 'evaluation'
     python vis_HO3D.py ${DB_PATH} ${YCB_PATH} -visType 'open3d' 
     ```
-    
+   
+
 The script provides parameters to visualize the annotations in 3D using open3d or in 2D in matplotlib window. Use `-visType` to set the visualization type.
 The script also provides parameters to visualize samples in the training and evaluation split using the parameters `-split`.
 
@@ -67,13 +68,13 @@ The script also provides parameters to visualize samples in the training and eva
 # Evaluate on the dataset
 
 In order to have consistent evaluation of the hand pose estimation algorithms on HO-3D dataset, evaluation is handled through CodaLab competition.
- 
+
 1. Make predictions for the evaluation dataset. The code provided here predicts zeros for all joints and vertices. ${ver} specifies the version
-of the dataset ('v2' or 'v3')
+   of the dataset ('v2' or 'v3')
     ```
     python pred.py ${DB_PATH} --version ${ver}
     ```
-     
+   
 2. Zip the `pred.json` file
     ```
     zip -j pred.zip pred.json
@@ -105,7 +106,7 @@ We provide the extrinsic camera parameters in 'calibration' folder of the datase
 for multi-camera sequences can be combined to visualize the point-cloud using the below script:
    ```python
     python vis_pcl_all_cameras.py ${DB_PATH} --seq SEQ --fid FID
-```
+   ```
 `SEQ` and `FID` are the sequence name and file name. Try `-h` for list of accepted sequence names.
 
 # Compare with Manual Annotations (only in version 3)
@@ -117,7 +118,7 @@ annotations by comparing with the manual annotations using the below script:
 python compare_manual_anno.py ${DB_PATH}
 ```
 
- 
+
 # Terms of use
 
 The download and use of the dataset is for academic research only and it is free to researchers from educational or research institutes
@@ -125,14 +126,14 @@ for non-commercial purposes. When downloading the dataset you agree to (unless w
 not redistribute, modificate, or commercial usage of this dataset in any way or form, either partially or entirely. 
 If using this dataset, please cite the corresponding paper.
 
-    
+
 	@INPROCEEDINGS{hampali2020honnotate,
-    	      title={HOnnotate: A method for 3D Annotation of Hand and Object Poses},
-              author={Shreyas Hampali and Mahdi Rad and Markus Oberweger and Vincent Lepetit},
-              booktitle = {CVPR},
+		      title={HOnnotate: A method for 3D Annotation of Hand and Object Poses},
+	          author={Shreyas Hampali and Mahdi Rad and Markus Oberweger and Vincent Lepetit},
+	          booktitle = {CVPR},
 	      year = {2020}
-             }
-    
+	         }
+
 # Acknowledgments
 
 1. The evaluation scripts used in the HO-3D challenge have been mostly re-purposed from [Freihand challenge](https://github.com/lmb-freiburg/freihand). We
