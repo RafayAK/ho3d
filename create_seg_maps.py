@@ -98,7 +98,7 @@ if __name__ == '__main__':
     args = vars(ap.parse_args())
 
     #FIXME: get this from args
-    palette = np.load("/home/rafay_veeve/Desktop/Veeve/galactus/cmap.npy")
+    palette = np.load("/home/veeve/workspace/Rafay/galactus/cmap.npy")
 
     baseDir = Path(args['ho3d_path'])
     YCBModelsDir = Path(args['ycbModels_path'])
@@ -112,6 +112,7 @@ if __name__ == '__main__':
     for seqName in os.listdir(data_base_path):
 
         print(os.listdir(data_base_path/seqName))
+        print(seqName)
 
         # store full sequence path
         full_seq_path = data_base_path/seqName
@@ -125,7 +126,14 @@ if __name__ == '__main__':
 
             # extract id from image_name
             id = img_name.split(".")[0]
+            
+            file_to_check = Path(str(data_base_path/seqName/"segmentations"/id) + ".png")
+            if file_to_check.is_file():
+                print(f"{id}.png already exists")
+                continue
+            
             print(id)
+            
             # read image, depth maps and annotations
             img = read_RGB_img(baseDir, seqName, id, split)
             depth = read_depth_img(baseDir, seqName, id, split)
